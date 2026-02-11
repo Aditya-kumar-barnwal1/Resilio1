@@ -1,0 +1,11 @@
+# Ignore dependencies in all subfolders
+node_modules/
+**/node_modules/
+
+# Ignore environment variables
+.env
+**/.env
+
+# Ignore build output
+/dist
+/build
