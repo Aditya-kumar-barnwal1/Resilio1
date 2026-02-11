@@ -14,7 +14,7 @@ const Dashboard = () => {
   const BACKEND_URL = useMemo(() => 
     window.location.hostname === "localhost" 
       ? "http://localhost:8000" 
-      : "https://resilio-tbts.onrender.com", 
+      : "https://resilio-tbts.onrender.com",
   []);
 
   // 2. State Management
