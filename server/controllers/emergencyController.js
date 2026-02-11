@@ -8,9 +8,9 @@ export const createEmergency = async (req, res) => {
   try {
     const { type, description, lat, lng } = req.body;
     
-    // ---------------------------------------------------------
+    // --------------------------------------------------------
     // 1. EXTRACT CLOUDINARY URLS (Image & Audio)
-    // ---------------------------------------------------------
+    // --------------------------------------------------------
     const imageFile = req.files && req.files['image'] ? req.files['image'][0] : null;
     const imageUrl = imageFile ? imageFile.path : null;
 
@@ -50,7 +50,7 @@ export const createEmergency = async (req, res) => {
           // ✅ 1. THE EXACT URL FROM YOUR SCREENSHOT
           const AI_API_URL = "https://resilio-qwo6.onrender.com/ai/image-url"; 
 
-          // ✅ 2. SEND DATA MATCHING THE SWAGGER DOCS
+          // ✅ 2. SEND DATA MATCHING DOCs
           const aiResponse = await axios.post(AI_API_URL, {
             emergencyId: savedEmergency._id.toString(), // "emergencyId" as per docs
             imageUrl: imageUrl                          // "imageUrl" as per docs

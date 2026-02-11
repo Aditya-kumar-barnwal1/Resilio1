@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-
 const emergencySchema = new mongoose.Schema({
   type: { 
     type: String, 
@@ -7,7 +6,7 @@ const emergencySchema = new mongoose.Schema({
   },
   severity: { 
     type: String, 
-    // Added 'Fake' to handle cases where AI detects a hoax
+    // Added 'Fake' to handle cases where AI detects a hoaxs
     enum: ['Critical', 'Serious', 'Minor', 'Pending', 'Fake'],
     default: 'Pending' 
   },
