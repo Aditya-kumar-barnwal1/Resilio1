@@ -20,7 +20,12 @@ const rescuerSchema = new mongoose.Schema({
     required: true 
   },
 
-  // --- PROFESSIONAL DETAILS --
+  role:{
+    type:String,
+    required:true,
+    enum:["rescuer"]
+  },
+  // --- PROFESSIONAL DETAILS ---
   department: { 
     type: String, 
     enum: ['Medical (Ambulance)', 'Fire Dept', 'Police Force', 'Disaster Relief'],
