@@ -154,16 +154,28 @@ const EmergencyDetail = ({ incident, onClose }) => {
               onError={(e) => { e.target.onerror = null; e.target.src="https://via.placeholder.com/600x800?text=Image+Load+Failed" }}
             />
             
+            {/* 1. DISPATCHED BADGE (Blue) */}
             {status === 'Assigned' && (
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white px-6 py-3 rounded-full font-bold shadow-xl animate-pulse flex items-center gap-2 z-20 whitespace-nowrap">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white px-6 py-3 rounded-full font-bold shadow-xl flex items-center gap-2 z-20 whitespace-nowrap border-4 border-white/20">
                 <Truck size={24} /> UNIT DISPATCHED
               </div>
             )}
             
-            {/* Show status overlay for other statuses too */}
-            {['En Route', 'On Scene'].includes(status) && (
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-orange-600 text-white px-6 py-3 rounded-full font-bold shadow-xl flex items-center gap-2 z-20 whitespace-nowrap">
-                <Truck size={24} /> {status.toUpperCase()}
+            {/* 2. EN ROUTE BADGE (Orange) */}
+            {status === 'En Route' && (
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-orange-500 text-white px-6 py-3 rounded-full font-bold shadow-xl flex items-center gap-2 z-20 whitespace-nowrap border-4 border-white/20">
+                <Navigation size={24} className="animate-pulse" /> EN ROUTE
+              </div>
+            )}
+
+            {/* 3. 🚨 ON SCENE BADGE (Red & Pulsing - "THE ARRIVAL INDICATOR") */}
+            {status === 'On Scene' && (
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-red-600 text-white px-8 py-4 rounded-full font-bold shadow-[0_0_50px_rgba(220,38,38,0.5)] animate-bounce-slow flex items-center gap-3 z-20 whitespace-nowrap border-4 border-white/30 backdrop-blur-sm">
+                <ShieldCheck size={32} /> 
+                <div className="flex flex-col items-start leading-none">
+                    <span className="text-[10px] opacity-80 uppercase tracking-widest">Status Update</span>
+                    <span className="text-lg">RESCUER ARRIVED</span>
+                </div>
               </div>
             )}
 

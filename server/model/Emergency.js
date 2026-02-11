@@ -31,6 +31,11 @@ const emergencySchema = new mongoose.Schema({
     enum: ['Pending', 'Assigned', 'En Route', 'On Scene', 'Resolved'], 
     default: 'Pending' 
   },
+  assignedRescuerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Rescuer', // Make sure this matches your Rescuer model name
+    default: null
+  },
   
   // ✅ NEW FIELD: Stores the full AI Analysis response
   aiAnalysis: {

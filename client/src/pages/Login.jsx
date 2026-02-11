@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShieldAlert, Lock, Mail, Loader2, AlertCircle } from 'lucide-react';
-import axios from 'axios'; // 1. Import Axios
+import axios from 'axios'; 
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -11,37 +11,42 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+  e.preventDefault();
+  setError('');
+  setLoading(true);
 
-    try {
-      // 2. Use axios.post instead of fetch
-      const response = await axios.post('https://resilio-tbts.onrender.com/api/v1/login', {
-        email, 
-        password
-      });
+  // 1. DYNAMIC URL LOGIC (The smart part)
+  const BACKEND_URL = window.location.hostname === "localhost"
+    ? "http://localhost:8000"           // If on your PC, use Local Backend
+    : "https://resilio-tbts.onrender.com"; // If live, use Render Backend
 
-      // Axios automatically throws an error for 4xx/5xx responses, 
-      // so we don't need the "if (!response.ok)" check manually.
+  try {
+    // 2. Use the dynamic variable here
+    const response = await axios.post(`${BACKEND_URL}/api/v1/login`, {
+      email, 
+      password
+    });
 
-      const data = response.data;
+    const data = response.data;
 
-      // 3. Store the JWT token & User info
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+    // 3. Store the JWT token & User info
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
 
-      // 4. Navigate to command center
+    // 4. ROLE-BASED NAVIGATION 🔀
+    if (data.user.role === 'rescuer') {
+      navigate('/rescuer');
+    } else {
       navigate('/dashboard');
-
-    } catch (err) {
-      // Axios stores the server response error in err.response
-      const errorMessage = err.response?.data?.message || 'Invalid credentials. Server connection failed.';
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
     }
-  };
+
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || 'Invalid credentials. Server connection failed.';
+    setError(errorMessage);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center p-4">
@@ -118,7 +123,7 @@ const Login = () => {
         </form>
 
         <p className="mt-8 text-center text-xs text-slate-400 uppercase tracking-widest">
-          [cite_start]Secured by Resilio AI Systems [cite: 52]
+          Secured by Resilio AI Systems
         </p>
       </div>
       

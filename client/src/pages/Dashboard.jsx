@@ -11,10 +11,11 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   // 1. Determine Backend URL
+  // ⚠️ FIX: If you want to test LIVE data on localhost, hardcode the Render URL here temporarily.
   const BACKEND_URL = useMemo(() => 
     window.location.hostname === "localhost" 
-      ? "http://localhost:8000" 
-      : "https://resilio-tbts.onrender.com",
+      ? "http://localhost:8000" // Change this to your Render URL if testing live data locally!
+      : "https://resilio-tbts.onrender.com", 
   []);
 
   // 2. State Management
@@ -24,6 +25,7 @@ const Dashboard = () => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [notifications, setNotifications] = useState(0);
   const [activeFilter, setActiveFilter] = useState('All');
+  const [socketStatus, setSocketStatus] = useState('Disconnected'); // New Debug State
 
   // REF TRICK: Tracks selected incident to prevent socket re-renders
   const selectedIncidentRef = useRef(null);
@@ -52,14 +54,29 @@ const Dashboard = () => {
     fetchEmergencies();
   }, [BACKEND_URL]);
 
-  // EFFECT 2: Real-Time Socket
+  // EFFECT 2: Real-Time Socket (UPDATED)
   useEffect(() => {
+    // 🔌 UPDATED SOCKET CONFIGURATION
     const socket = io(BACKEND_URL, {
-      transports: ['websocket'], 
-      reconnectionAttempts: 5,
+      transports: ['websocket', 'polling'], // Allow polling fallback (Fixes many connection issues)
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+    });
+
+    // 🛠️ DEBUGGING LISTENERS (Check Console)
+    socket.on("connect", () => {
+        console.log("🟢 Connected to Live Socket:", socket.id);
+        setSocketStatus('Connected');
+    });
+
+    socket.on("connect_error", (err) => {
+        console.error("🔴 Socket Connection Error:", err.message);
+        setSocketStatus('Error');
     });
 
     socket.on("new-emergency", (newReport) => {
+      console.log("🔔 New Emergency Received:", newReport); // Log new events
       try {
         const audio = new Audio('/alert.mp3'); 
         audio.play().catch(e => console.warn("Audio blocked"));
@@ -70,6 +87,7 @@ const Dashboard = () => {
     });
 
     socket.on("emergency-updated", (updatedReport) => {
+      console.log("🔄 Emergency Updated:", updatedReport); // Log updates
       setEmergencies((prev) => 
         prev.map((item) => (item._id === updatedReport._id ? updatedReport : item))
       );
@@ -137,6 +155,13 @@ const Dashboard = () => {
           <button className="w-full flex items-center gap-3 px-4 py-3 bg-red-600 rounded-lg text-sm font-semibold shadow-lg shadow-red-900/20">
             <LayoutDashboard size={18} /> Live Feed
           </button>
+          
+          {/* DEBUG INDICATOR */}
+          <div className="mt-auto pt-4 px-2">
+            <div className={`text-xs font-mono p-2 rounded border ${socketStatus === 'Connected' ? 'border-green-800 text-green-400 bg-green-900/20' : 'border-red-800 text-red-400 bg-red-900/20'}`}>
+                ● Socket: {socketStatus}
+            </div>
+          </div>
         </nav>
       </aside>
 
@@ -146,7 +171,7 @@ const Dashboard = () => {
           <div className="flex items-center gap-3">
             <Menu className="text-slate-500 md:hidden" />
             <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-              <span className="w-2 h-2 bg-red-600 rounded-full animate-ping"></span>
+              <span className={`w-2 h-2 rounded-full ${socketStatus === 'Connected' ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></span>
               Live Emergency Feed
             </h2>
           </div>
@@ -259,12 +284,10 @@ const Dashboard = () => {
                           </span>
                         </div>
                         
-                        {/* ✅ DESCRIPTION RESTORED */}
                         <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-3 pl-2">
                            {incident.description || "No description provided."}
                         </p>
                         
-                        {/* Footer with Metadata & Tags */}
                         <div className="flex items-center justify-between pt-2 border-t border-slate-100 pl-2">
                            <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
                               <span className="flex items-center gap-1 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
@@ -272,7 +295,6 @@ const Dashboard = () => {
                               </span>
                            </div>
                            
-                           {/* 🏷️ MEDIA & AI BADGES */}
                            <div className="flex gap-1">
                               {incident.audioUrl && (
                                 <span className="text-[10px] font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded border border-red-200 flex items-center gap-1" title="Voice Message">
